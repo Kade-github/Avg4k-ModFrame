@@ -30,6 +30,10 @@ playfields = {
     0
 }
 
+drawsize = {
+    {-8, 8} -- plr 1
+}
+
 -- setup arrays
 
 --[[
@@ -73,10 +77,10 @@ ModFrame.activeMods = {
 --[[
     defineMod defines a mod that you can then set the value to using setModValue/setModValueColumn
 
-    defineMod{'modName', 0, function(beat, perc, me, plr)
+    defineMod{'modName', function(beat, perc, me, plr)
             -- Your code
             -- "me" is simply a reference to your custom mod, which contains a .value property you can set
-        end, false, false}
+        end, false, false, 0}
 
     The 0 is the default value.
 
@@ -107,7 +111,8 @@ function defineMod(n)
 end
 
 function addPlayer()
-    table.insert(playfields, createPlayfield())
+    table.insert(playfields, createPlayfield() + 1)
+    table.insert(drawsize, {-8,8})
 end
 
 --[[
@@ -120,7 +125,8 @@ end
         tweenStart = 1,
         tweenLen = 4,
         easing = 'outcubic',
-        column = -1 -- no column
+        column = -1, -- no column
+        add = false
     }
 
     Note: Do not add the "modName =" etc.
@@ -139,6 +145,11 @@ function me(n)
     m.column = n[7]
     if m.column == nil then
         m.column = -1
+    end
+    if n[8] == nil then
+        m.additive = false
+    else
+        m.additive = n[8]
     end
     m.playfield = plr
 
@@ -200,7 +211,9 @@ function ModFrame.create()
     defineMod{'stealthReceptorOpacity', nil, true, true, 1}
     defineMod{'pathAlpha', nil, true, false, 0}
     defineMod{'pathDensity', nil, true, false, 1}
-
+    defineMod{'cmod', function(beat, perc, me, plr)
+        setScrollSpeed(perc, plr)
+    end, false, false, config.scrollSpeed}
     consolePrint("ModFrame Loaded! Created by Kade :)")
 end
 
@@ -225,10 +238,10 @@ end
 function setModValueColumn(name, column, pid, v)
     for index, value in ipairs(ModFrame.mods) do
         if value.name == name then
-            if value.columns[pid] == nil then
-                value.columns[pid] = {}
+            if value.columns[pid + 1] == nil then
+                value.columns[pid + 1] = {}
             end
-            value.columns[pid][column] = {value = v}
+            value.columns[pid + 1][column] = {value = v}
         end
     end
 end
@@ -278,20 +291,29 @@ function ModFrame.update(beat)
 
                 if m.startValue == nil then
                     m.startValue = md.value
+                    if md.playfieldValues[m.playfield + 1] ~= nil then
+                        m.startValue = md.playfieldValues[m.playfield + 1]
+                    end
+                    if m.additive then
+                        m.endValue = m.startValue + m.endValue
+                    end
+    
                 end
-
+                
                 local value = tween(m.startValue, m.endValue, t, m.easing)
 
+
+
                 if md.useColumns then
-                    if md.columns[m.playfield] == nil then
-                        md.columns[m.playfield] = {}
+                    if md.columns[m.playfield + 1] == nil then
+                        md.columns[m.playfield + 1] = {}
                     end
                     if m.column ~= -1 and m.column ~= nil then
-                        md.columns[m.playfield][m.column] = {value = value}
+                        md.columns[m.playfield + 1][m.column] = {value = value}
                     end
                 else
                     md.value = value
-                    md.playfieldValues[m.playfield] = value
+                    md.playfieldValues[m.playfield + 1] = value
                 end
 
                 if md.func ~= nil then
@@ -303,7 +325,7 @@ function ModFrame.update(beat)
 
     for index1, mod in ipairs(ModFrame.mods) do
         if mod.setBack then
-            for pn = 0,#playfields - 1 do
+            for pn = 1,#playfields do
                 local value = mod.value
 
                 if mod.playfieldValues[pn] ~= nil then
@@ -316,19 +338,25 @@ function ModFrame.update(beat)
                         for i = 1, 4 do
                             local col = c[i]
                             if col ~= nil then
-                                setModProperty(mod.name, pn, i - 1, col.value)
+                                setModProperty(mod.name, pn - 1, i - 1, col.value)
                             else
-                                setModProperty(mod.name, pn, i - 1, value)
+                                setModProperty(mod.name, pn - 1, i - 1, value)
                             end
                         end
                     else
-                        setModProperty(mod.name, pn, -1, value)
+                        setModProperty(mod.name, pn - 1, -1, value)
                     end
                 else
-                    setModProperty(mod.name, pn, -1, value)
+                    setModProperty(mod.name, pn - 1, -1, value)
                 end
             end
         end
+    end
+
+    for i = 1, #drawsize do
+        local draw = drawsize[i]
+        setModProperty('drawSize', i - 1, 0, draw[1])
+        setModProperty('drawSize', i - 1, 1, draw[2])
     end
 end
 
