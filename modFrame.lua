@@ -217,7 +217,10 @@ function ModFrame.create()
     defineMod{'hidden',function(beat, perc, me, plr)
         drawsize[plr + 1] = {1 * perc,drawsize[plr + 1][2]}
     end, false, false, 0}
-    
+    defineMod{'hiddenin',function(beat, perc, me, plr)
+        drawsize[plr + 1] = {drawsize[plr + 1][1],1 / perc}
+    end, false, false, 0}
+
     consolePrint("ModFrame Loaded! Created by Kade :)")
 end
 
