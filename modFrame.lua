@@ -214,6 +214,10 @@ function ModFrame.create()
     defineMod{'cmod', function(beat, perc, me, plr)
         setScrollSpeed(perc, plr)
     end, false, false, config.scrollSpeed}
+    defineMod{'hidden',function(beat, perc, me, plr)
+        drawsize[plr + 1] = {1 * perc,drawsize[plr + 1][2]}
+    end, false, false, 0}
+    
     consolePrint("ModFrame Loaded! Created by Kade :)")
 end
 
@@ -244,6 +248,27 @@ function setModValueColumn(name, column, pid, v)
             value.columns[pid + 1][column] = {value = v}
         end
     end
+end
+
+function getModValue(name, v)
+    for index, value in ipairs(ModFrame.mods) do
+        if value.name == name then
+            return value.value 
+        end
+    end
+    return nil
+end
+
+function getModValueColumn(name, column, pid, v)
+    for index, value in ipairs(ModFrame.mods) do
+        if value.name == name then
+            if value.columns[pid + 1] == nil then
+                value.columns[pid + 1] = {}
+            end
+            return value.columns[pid + 1][column]
+        end
+    end
+    return nil
 end
 
 function getMod(name)
