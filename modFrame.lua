@@ -74,6 +74,36 @@ ModFrame.activeMods = {
 
 }
 
+
+--[[
+    Structure
+
+    shaderName
+    startValue - if nil, assign the current value as that start value
+    endValue
+    tweenStart
+    tweenLen
+    uniform
+    easing
+    complete
+
+]]
+
+ModFrame.shaderMods = {
+
+}
+
+--[[
+    Structure
+
+    shaderName
+    uniforms (array)
+]]--
+
+ModFrame.shaders = {
+
+}
+
 --[[
     defineMod defines a mod that you can then set the value to using setModValue/setModValueColumn
 
@@ -108,6 +138,23 @@ function defineMod(n)
     m.columns = {}
     m.default = m.value
     table.insert(ModFrame.mods,m)
+end
+
+--[[
+    Both shaderVert and shaderFrag could be "NULL", which means they go to the default.
+    shader{'shaderName','shaderVert', 'shaderFrag', {{'uniform1', 0}}}
+]]--
+
+function shader(s)
+    createShader(s[1], s[2], s[3])
+    for index, u in ipairs(s[4]) do
+        setShaderUniform(s[1], u[1], u[2])
+    end
+    table.insert(ModFrame.shaders, s)
+end
+
+function shaderTarget(spriteName, shader)
+    applyShader(shader, spriteName)
 end
 
 function addPlayer()
@@ -154,6 +201,28 @@ function me(n)
     m.playfield = plr
 
     table.insert(ModFrame.activeMods,m)
+end
+
+--[[
+    Smootly interperlates to an end value from a start value on a shader.
+
+    Example (on beat 4, over 1 beats in length. set the value of aberration on the aberration shader to 1 from 0):
+    se{'aberration',0,1,4,1,'aberration','outCubic'}
+]]--
+
+function se(n)
+    local m = {}
+    m.shader = n[1]
+    m.startValue = n[2]
+    m.endValue = n[3]
+    m.tweenStart = n[4]
+    m.tweenLen = n[5]
+    m.uniform = n[6]
+    m.easing = n[7]
+    m.complete = false
+    
+
+    table.insert(ModFrame.shaderMods,m)
 end
 
 --[[
@@ -293,6 +362,30 @@ function getModIndex(name)
 end
 
 function ModFrame.update(beat)
+    for index, m in ipairs(ModFrame.shaderMods) do
+        if beat > m.tweenStart and not m.complete then
+            local dur = (beat - m.tweenStart)
+
+            local t = 0
+
+            if m.tweenLen == 0 then
+                t = 1
+            else
+                t = (dur / m.tweenLen)
+            end
+
+            if beat > m.tweenStart + m.tweenLen then
+                ModFrame.shaderMods[index].complete = true
+                t = 1
+            end
+            local value = tween(m.startValue, m.endValue, t, m.easing)
+
+            consolePrint(tostring(value))
+
+            setShaderUniform(m.shader, m.uniform, value)
+
+        end
+    end
     for index, m in ipairs(ModFrame.activeMods) do
         if beat > m.tweenStart and not m.complete then
             
@@ -393,6 +486,14 @@ function ModFrame.editor_scroll()
         m.value = m.default
         m.columns = {}
         m.playfieldValues = {}
+    end
+    for index, m in ipairs(ModFrame.shaderMods) do
+        m.complete = false
+    end
+    for index, m in ipairs(ModFrame.shaders) do
+        for index, u in ipairs(m[4]) do
+            setShaderUniform(m[1], u[1], u[2])
+        end
     end
     for index, m in ipairs(ModFrame.activeMods) do
         m.complete = false
