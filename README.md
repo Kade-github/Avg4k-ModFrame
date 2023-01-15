@@ -129,6 +129,8 @@ There are some other functions that I will now list here:
 | getModValue | Get a mods value |
 | setModValue | Set a mods value |
 | setModValueColumn | Set a mods value on a column |
+| getModValueColumn | Get a mods value on a column |
 | addPlayer | Add a player in Average4K, and also append it's id to the **playfields** global |
 | shader | Creates a shader (example: `shader{'shaderName','shaderVert', 'shaderFrag', {{'uniform1', 0}}}`) |
 | se | Shader Ease (like me, but for shaders. Example: `se{'aberration',0,1,4,1,'aberration','outCubic'}`) |
+| dump | A helper function that dumps everything in a table to a string. Usage: `dump(table)` |
