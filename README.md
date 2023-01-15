@@ -120,6 +120,19 @@ defineMod{'myMod',0, function(beat, perc, me, plr)
 end, false, false}
 ```
 
+## DrawSize
+
+Draw size is basically how many beats away from the playfield to draw notes. Notes **also fade in and out as they cross the borders of drawing.**
+
+Example usage:
+```lua
+-- in create()
+-- [1] for the playfield.
+drawsize[1] = {-0.1,2} -- stop drawing notes when they're -0.1 beats away from the receptors, and 2 beats away from the receptors.
+-- on playfield 2 (after an addPlayer() call)
+drawsize[2] = {-0.1,2} -- do the same thing
+```
+
 ## Other functions
 
 There are some other functions that I will now list here:
