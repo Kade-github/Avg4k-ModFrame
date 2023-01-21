@@ -133,6 +133,8 @@ drawsize[1] = {-0.1,2} -- stop drawing notes when they're -0.1 beats away from t
 drawsize[2] = {-0.1,2} -- do the same thing
 ```
 
+**Hidden/Hiddenin modify this!**
+
 ## ModFrame Custom Mods
 
 | Mod | Description |
