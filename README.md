@@ -133,6 +133,14 @@ drawsize[1] = {-0.1,2} -- stop drawing notes when they're -0.1 beats away from t
 drawsize[2] = {-0.1,2} -- do the same thing
 ```
 
+## ModFrame Custom Mods
+
+| Mod | Description |
+| --- |----------- |
+| cmod | Allows you to set the scroll speed |
+| hidden | Describes when to start fading out notes (in beats away from the receptor) |
+| hiddenin | Describes when to start fading in notes (in beats away from the receptor |
+
 ## Other functions
 
 There are some other functions that I will now list here:
